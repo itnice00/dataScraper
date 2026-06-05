@@ -40,8 +40,8 @@ app:
 # 详细时间线图请查看 config/timeline.yaml
 # ===============================================================
 schedule:
-  enabled: false                        # 是否启用调度系统（true=启用, false=关闭，默认关闭）
-  preset: "morning_evening"             # 预设模板名称（见上方说明）
+  enabled: true                         # 是否启用调度系统（true=启用, false=关闭，默认关闭）
+  preset: "custom"                      # 使用 timeline.yaml 底部 custom 段：每天 18:00-20:00 推送一次
 
 
 # ===============================================================
@@ -168,7 +168,8 @@ report:
 
   rank_threshold: 5                   # 排名高亮阈值（影响展示强调，不改变抓取范围）
 
-  max_news_per_keyword: 0             # 每个关键词/标签最大显示数量（0=不限制，仅影响展示裁剪）
+  max_news_per_keyword: 5             # 每个关键词/标签最大显示数量（0=不限制，仅影响展示裁剪）
+                                      # 约 10 个标签同时命中时，热榜+RSS 合计约 50 条以内
 
 
 # ===============================================================
@@ -421,7 +422,7 @@ ai_analysis:
                                     # follow_report = 跟随 report.mode（默认）
                                     # daily / current / incremental = 强制使用指定模式
 
-  max_news_for_analysis: 150        # 参与分析的新闻数量上限（控制 token 成本的关键项）
+  max_news_for_analysis: 50         # 参与分析的新闻数量上限（控制 token 成本的关键项）
                                     # 热榜优先占用配额，RSS 用剩余配额，独立展示区不受此限制
 
   include_rss: false                # 是否包含 RSS 内容进行分析（true=包含, false=不包含）
