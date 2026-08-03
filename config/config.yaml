@@ -41,7 +41,7 @@ app:
 # ===============================================================
 schedule:
   enabled: true                         # 是否启用调度系统（true=启用, false=关闭，默认关闭）
-  preset: "custom"                      # 使用 timeline.yaml 底部 custom 段：每天 18:00-20:00 推送一次
+  preset: "custom"                      # 使用 timeline.yaml 底部 custom 段：每天 17:30-19:30 推送一次
 
 
 # ===============================================================
@@ -72,18 +72,13 @@ platforms:
     - id: "baidu"
       name: "百度热搜"
       expected_domain: "baidu.com"
-    - id: "wallstreetcn-hot"
-      name: "华尔街见闻"
-      expected_domain: "wallstreetcn.com"
+    # 已移除财经源 wallstreetcn-hot / cls-hot（小游戏情报场景噪音大）
     - id: "thepaper"
       name: "澎湃新闻"
       expected_domain: "thepaper.cn"
     - id: "bilibili-hot-search"
       name: "bilibili 热搜"
       expected_domain: "bilibili.com"
-    - id: "cls-hot"
-      name: "财联社热门"
-      expected_domain: "cls.cn"
     - id: "ifeng"
       name: "凤凰网"
       expected_domain: "ifeng.com"
@@ -130,23 +125,33 @@ rss:
     - id: "hacker-news"
       name: "Hacker News"
       url: "https://hnrss.org/frontpage"
+      enabled: false                  # 已停用：非小游戏主题
 
     - id: "ruanyifeng"
       name: "阮一峰的网络日志"
       url: "http://www.ruanyifeng.com/blog/atom.xml"
-      enabled: false                  # 禁用
-      # max_age_days: 3               # 示例：推送 3 天内的文章（更新较慢的博客）
-     
+      enabled: false
+
     - id: "yahoo-finance"
       name: "雅虎财经"
       url: "https://finance.yahoo.com/news/rssindex"
+      enabled: false                  # 已停用：财经噪音
 
-    # 自定义源示例
-    # - id: "custom-feed"
-    #   name: "自定义源"
-    #   url: "https://example.com/feed.xml"
-    #   enabled: false
-    #   max_age_days: 0               # 示例：禁用过滤，推送所有文章
+    - id: "pocketgamer-biz"
+      name: "PocketGamer.biz"
+      url: "https://www.pocketgamer.biz/rss/"
+
+    - id: "gamesindustry"
+      name: "GamesIndustry.biz"
+      url: "https://www.gamesindustry.biz/feed"
+
+    - id: "deconstructor"
+      name: "Deconstructor of Fun"
+      url: "https://www.deconstructoroffun.com/blog?format=rss"
+
+    - id: "gamedeveloper"
+      name: "Game Developer"
+      url: "https://www.gamedeveloper.com/rss.xml"
 
 
 # ===============================================================
@@ -162,8 +167,8 @@ report:
                                       # keyword = 按关键词分组显示
                                       # platform = 按平台/来源分组显示
 
-  sort_by_position_first: false       # 关键词模式排序（仅 display_mode=keyword 时生效）
-                                      # true = 按 frequency_words.txt 的定义顺序
+  sort_by_position_first: true        # 关键词模式排序（仅 display_mode=keyword 时生效）
+                                      # true = 按 frequency_words.txt 的定义顺序（小游戏→政策→平台）
                                       # false = 按匹配到的热点条数排序（多的在前）
 
   rank_threshold: 5                   # 排名高亮阈值（影响展示强调，不改变抓取范围）
@@ -246,8 +251,8 @@ display:
   # 独立展示区：将指定平台/RSS 完整展示，不受关键词过滤
   # 推送展示由 regions.standalone 控制，AI 分析由 ai_analysis.include_standalone 控制
   standalone:
-    platforms: ["zhihu", "wallstreetcn-hot"]     # 热榜平台 ID 列表（如 ["zhihu", "weibo"]）
-    rss_feeds: []                                # RSS 源 ID 列表（如 ["hacker-news"]）
+    platforms: ["zhihu", "bilibili-hot-search"]  # 热榜平台 ID 列表（如 ["zhihu", "weibo"]）
+    rss_feeds: []                                # RSS 源 ID 列表（如 ["pocketgamer-biz"]）
     max_items: 20                                # 每个源最多展示条数（0=不限制）
 
 
@@ -425,7 +430,7 @@ ai_analysis:
   max_news_for_analysis: 50         # 参与分析的新闻数量上限（控制 token 成本的关键项）
                                     # 热榜优先占用配额，RSS 用剩余配额，独立展示区不受此限制
 
-  include_rss: false                # 是否包含 RSS 内容进行分析（true=包含, false=不包含）
+  include_rss: true                 # 是否包含 RSS 内容进行分析（true=包含, false=不包含）
   include_standalone: true          # 是否纳入独立展示区数据（true=纳入, false=不纳入）
 
   include_rank_timeline: true       # 排名时间线详细程度

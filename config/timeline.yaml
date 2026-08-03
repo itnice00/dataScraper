@@ -461,8 +461,8 @@ custom:
 
     daily_evening_push:
       name: "每日晚间推送"
-      start: "18:00"
-      end: "20:00"                 # 目标 18:30，窗口 2h 兼容 GitHub Actions 延迟
+      start: "17:30"
+      end: "19:30"                 # 目标约 18:00，窗口 2h 兼容 GitHub Actions 延迟
       analyze: true
       ai_mode: "daily"
       push: true
