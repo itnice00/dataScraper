@@ -66,14 +66,16 @@ def _format_list_content(text: str) -> str:
 
 
 def _format_standalone_summaries(summaries: dict) -> str:
-    """格式化独立展示区概括为纯文本行，每个源名称单独一行"""
+    """格式化独立展示区概括：源名单独成行，条目强制换行对齐"""
     if not summaries:
         return ""
-    lines = []
+    blocks = []
     for source_name, summary in summaries.items():
-        if summary:
-            lines.append(f"[{source_name}]:\n{summary}")
-    return "\n\n".join(lines)
+        if not summary or not str(summary).strip():
+            continue
+        body = _format_list_content(str(summary))
+        blocks.append(f"【{source_name}】\n{body}")
+    return "\n\n".join(blocks)
 
 
 def render_ai_analysis_markdown(result: AIAnalysisResult) -> str:
@@ -109,7 +111,7 @@ def render_ai_analysis_markdown(result: AIAnalysisResult) -> str:
     if result.standalone_summaries:
         summaries_text = _format_standalone_summaries(result.standalone_summaries)
         if summaries_text:
-            lines.extend(["**独立源点速览**", summaries_text])
+            lines.extend(["**海外/独立源速览**", summaries_text])
 
     return "\n".join(lines)
 
@@ -147,7 +149,7 @@ def render_ai_analysis_feishu(result: AIAnalysisResult) -> str:
     if result.standalone_summaries:
         summaries_text = _format_standalone_summaries(result.standalone_summaries)
         if summaries_text:
-            lines.extend(["**独立源点速览**", summaries_text])
+            lines.extend(["**海外/独立源速览**", summaries_text])
 
     return "\n".join(lines)
 
@@ -191,7 +193,7 @@ def render_ai_analysis_dingtalk(result: AIAnalysisResult) -> str:
     if result.standalone_summaries:
         summaries_text = _format_standalone_summaries(result.standalone_summaries)
         if summaries_text:
-            lines.extend(["#### 独立源点速览", summaries_text])
+            lines.extend(["#### 海外/独立源速览", summaries_text])
 
     return "\n".join(lines)
 
@@ -225,7 +227,7 @@ def render_ai_analysis_plain(result: AIAnalysisResult) -> str:
     if result.standalone_summaries:
         summaries_text = _format_standalone_summaries(result.standalone_summaries)
         if summaries_text:
-            lines.extend(["[独立源点速览]", summaries_text])
+            lines.extend(["[海外/独立源速览]", summaries_text])
 
     return "\n".join(lines)
 
@@ -262,7 +264,7 @@ def render_ai_analysis_telegram(result: AIAnalysisResult) -> str:
     if result.standalone_summaries:
         summaries_text = _format_standalone_summaries(result.standalone_summaries)
         if summaries_text:
-            lines.extend(["<b>独立源点速览</b>", _escape_html(summaries_text)])
+            lines.extend(["<b>海外/独立源速览</b>", _escape_html(summaries_text)])
 
     return "\n".join(lines)
 
@@ -359,7 +361,7 @@ def render_ai_analysis_html_rich(result: AIAnalysisResult) -> str:
             summaries_html = _escape_html(summaries_text).replace("\n", "<br>")
             ai_html += f"""
                     <div class="ai-block">
-                        <div class="ai-block-title">独立源点速览</div>
+                        <div class="ai-block-title">海外/独立源速览</div>
                         <div class="ai-block-content">{summaries_html}</div>
                     </div>"""
 
