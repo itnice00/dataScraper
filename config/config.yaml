@@ -113,7 +113,7 @@ rss:
   freshness_filter:
     enabled: true                     # 是否启用新鲜度过滤（true=启用, false=关闭）
 
-    max_age_days: 1                   # 最大文章年龄（天）
+    max_age_days: 3                   # 最大文章年龄（天）；行业博客更新慢，放宽到 3 天
                                       # - 正整数：只推送 N 天内的文章
                                       # - 0：禁用过滤，推送所有文章
 
@@ -148,6 +148,7 @@ rss:
     - id: "deconstructor"
       name: "Deconstructor of Fun"
       url: "https://www.deconstructoroffun.com/blog?format=rss"
+      max_age_days: 14                # 深度长文更新慢
 
     - id: "gamedeveloper"
       name: "Game Developer"
@@ -244,16 +245,20 @@ display:
     new_items: false                  # 新增热点区域：含热榜新增 + RSS 新增（true=显示, false=隐藏）
                                       # 注：热点词汇统计中的新增标记🆕不受此配置影响
 
-    rss: true                         # RSS 订阅区域（true=显示并分析, false=隐藏并跳过分析）
-    standalone: false                 # 独立展示区：完整热榜/RSS，不受关键词过滤（true=显示, false=隐藏）
-    ai_analysis: true                 # AI 分析区域（true=显示, false=隐藏）
+    rss: true                         # RSS 订阅区域（关键词匹配结果）
+    standalone: true                  # 独立展示区：游戏 RSS 完整展示，不受关键词过滤
+    ai_analysis: true                 # AI 分析区域（true=显示, false=隐藏）；需配置 AI_API_KEY
 
   # 独立展示区：将指定平台/RSS 完整展示，不受关键词过滤
   # 推送展示由 regions.standalone 控制，AI 分析由 ai_analysis.include_standalone 控制
   standalone:
-    platforms: ["zhihu", "bilibili-hot-search"]  # 热榜平台 ID 列表（如 ["zhihu", "weibo"]）
-    rss_feeds: []                                # RSS 源 ID 列表（如 ["pocketgamer-biz"]）
-    max_items: 20                                # 每个源最多展示条数（0=不限制）
+    platforms: []                     # 不完整倾倒热榜，避免噪音；热榜仍走关键词匹配
+    rss_feeds:                        # 游戏行业 RSS 完整展示（英文源不依赖中文关键词）
+      - "pocketgamer-biz"
+      - "gamesindustry"
+      - "deconstructor"
+      - "gamedeveloper"
+    max_items: 8                      # 每个源最多展示条数（控制推送体积）
 
 
 # ===============================================================
