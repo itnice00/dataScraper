@@ -866,18 +866,18 @@ class NewsAnalyzer:
                 standalone_data=standalone_data
             )
 
-        # 翻译 RSS 内容（如果启用）— 在 HTML 生成前执行，确保网页版也能展示翻译内容
-        # 注意：仅翻译 rss_items 和 rss_new_items，不翻译 standalone_data（通知前会重新生成）
-        # 热榜翻译在推送时由 dispatch_all 处理 report_data
+        # 翻译 RSS / 独立展示区（如果启用）— 在 HTML 生成前执行，确保网页版也能展示中文标题
+        # 推送时会重建 standalone 并再次翻译；热榜翻译在 dispatch_all 处理
         trans_config = self.ctx.config.get("AI_TRANSLATION", {})
         if trans_config.get("ENABLED", False):
             dispatcher = self.ctx.create_notification_dispatcher()
             display_regions = self.ctx.config.get("DISPLAY", {}).get("REGIONS", {})
-            _, rss_items, rss_new_items, _ = \
+            _, rss_items, rss_new_items, standalone_data = \
                 dispatcher.translate_content(
                     report_data={"stats": [], "new_titles": []},
                     rss_items=rss_items,
                     rss_new_items=rss_new_items,
+                    standalone_data=standalone_data,
                     display_regions=display_regions,
                 )
 
