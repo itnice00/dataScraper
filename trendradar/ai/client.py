@@ -38,6 +38,7 @@ class AIClient:
         self.timeout = config.get("TIMEOUT", 120)
         self.num_retries = config.get("NUM_RETRIES", 2)
         self.fallback_models = config.get("FALLBACK_MODELS", [])
+        self.extra_params = config.get("EXTRA_PARAMS") or {}
 
     def chat(
         self,
@@ -83,7 +84,24 @@ class AIClient:
         if self.fallback_models:
             params["fallbacks"] = self.fallback_models
 
-        # 合并其他额外参数
+        # 合并 config.yaml 的 extra_params（如 DeepSeek thinking 开关）
+        for key, value in self.extra_params.items():
+            if key == "extra_body" and isinstance(value, dict):
+                body = dict(params.get("extra_body") or {})
+                body.update(value)
+                params["extra_body"] = body
+            elif key not in params:
+                params[key] = value
+
+        # DeepSeek V4 默认开启 thinking：推理会占满 max_tokens，导致 content 为空
+        # 未显式配置时自动关闭 thinking，保证分析/翻译拿得到正文
+        if "deepseek" in (self.model or "").lower():
+            body = dict(params.get("extra_body") or {})
+            if "thinking" not in body:
+                body["thinking"] = {"type": "disabled"}
+                params["extra_body"] = body
+
+        # 合并调用方额外参数
         for key, value in kwargs.items():
             if key not in params:
                 params[key] = value
@@ -91,15 +109,32 @@ class AIClient:
         # 调用 LiteLLM
         response = completion(**params)
 
+        message = response.choices[0].message
+        finish_reason = getattr(response.choices[0], "finish_reason", None)
+
         # 提取响应内容
         # 某些模型/提供商返回 list（内容块）而非 str，统一转为 str
-        content = response.choices[0].message.content
+        content = message.content
         if isinstance(content, list):
             content = "\n".join(
                 item.get("text", str(item)) if isinstance(item, dict) else str(item)
                 for item in content
             )
-        return content or ""
+        content = content or ""
+
+        # thinking 模式下正文可能在 reasoning_content，或因 length 截断导致 content 为空
+        if not content.strip():
+            reasoning = getattr(message, "reasoning_content", None) or ""
+            if reasoning:
+                print(
+                    f"[AI] 警告: content 为空，但收到 reasoning_content "
+                    f"({len(reasoning)} 字符, finish_reason={finish_reason})；"
+                    f"请关闭 thinking 或增大 max_tokens"
+                )
+            else:
+                print(f"[AI] 警告: 模型返回空 content (finish_reason={finish_reason})")
+
+        return content
 
     def validate_config(self) -> tuple[bool, str]:
         """
