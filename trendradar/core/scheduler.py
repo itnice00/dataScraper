@@ -7,11 +7,19 @@
 """
 
 import copy
+import os
 import re
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
 from datetime import datetime
+
+
+def _is_manual_force_push() -> bool:
+    """GitHub 手动 Run / 本地 FORCE_PUSH 时，绕过时段与 once 限制"""
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        return True
+    return os.environ.get("FORCE_PUSH", "").strip().lower() in ("1", "true", "yes", "on")
 
 
 @dataclass
@@ -172,6 +180,21 @@ class Scheduler:
             filter_method=merged.get("filter_method"),
             interests_file=merged.get("interests_file"),
         )
+
+        # 手动触发：随时可推，不受 17:30-19:30 窗口与 once 限制
+        if _is_manual_force_push():
+            resolved.push = True
+            resolved.analyze = True
+            resolved.once_push = False
+            resolved.once_analyze = False
+            # 窗口外默认是 current；手动跑改为当日汇总，内容更完整
+            if not period_key:
+                resolved.report_mode = "daily"
+                resolved.ai_mode = "daily"
+            print(
+                "[调度] 手动触发：强制开启推送/分析，忽略 once；"
+                f"报告模式={resolved.report_mode}"
+            )
 
         # 打印行为摘要
         actions = []

@@ -167,4 +167,7 @@ jobs:
           S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
           S3_REGION: ${{ secrets.S3_REGION }}
           GITHUB_ACTIONS: true
+          # workflow_dispatch 时由代码识别 GITHUB_EVENT_NAME，强制推送（不受时段/once 限制）
+          # 本地也可设 FORCE_PUSH=true 达到同样效果
+          FORCE_PUSH: ${{ github.event_name == 'workflow_dispatch' && 'true' || '' }}
         run: uv run python -m trendradar

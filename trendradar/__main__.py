@@ -935,10 +935,17 @@ class NewsAnalyzer:
         has_notification = self._has_notification_configured()
         cfg = self.ctx.config
 
-        # 检查是否有有效内容（热榜或RSS）
+        # 检查是否有有效内容（热榜 / 关键词 RSS / 独立展示区）
         has_news_content = self._has_valid_content(stats, new_titles)
         has_rss_content = bool(rss_items and len(rss_items) > 0)
-        has_any_content = has_news_content or has_rss_content
+        has_standalone = bool(
+            standalone_data
+            and (
+                any(p.get("items") for p in standalone_data.get("platforms", []) or [])
+                or any(f.get("items") for f in standalone_data.get("rss_feeds", []) or [])
+            )
+        )
+        has_any_content = has_news_content or has_rss_content or has_standalone
 
         # 计算热榜匹配条数
         news_count = sum(len(stat.get("titles", [])) for stat in stats) if stats else 0
